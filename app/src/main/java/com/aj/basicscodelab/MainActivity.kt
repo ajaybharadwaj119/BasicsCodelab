@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
@@ -39,7 +42,38 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun OnboardingScreen(modifier: Modifier = Modifier) {
+fun MyApp(modifier: Modifier = Modifier) {
+
+    var shouldShowOnboarding by remember { mutableStateOf(true) }
+
+    Surface(modifier) {
+        if (shouldShowOnboarding) {
+            OnboardingScreen(onContinueClicked = { shouldShowOnboarding = false })
+        } else {
+            Greetings()
+        }
+    }
+}
+
+
+@Composable
+private fun Greetings(
+    modifier: Modifier = Modifier,
+    names: List<String> = List(1000) { "$it" }
+) {
+    LazyColumn(modifier = modifier.padding(vertical = 4.dp)) {
+        items(items = names) { name ->
+            Greeting(name = name)
+
+        }
+    }
+}
+
+@Composable
+fun OnboardingScreen(
+    onContinueClicked: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     // TODO: This state should be hoisted
     var shouldShowOnboarding by remember { mutableStateOf(true) }
 
@@ -48,7 +82,7 @@ fun OnboardingScreen(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Welcome to the Basics Codelab!")
+        Text("Welcome to the Basics Code Lab!")
         Button(
             modifier = Modifier.padding(vertical = 24.dp),
             onClick = { shouldShowOnboarding = false }
@@ -60,22 +94,12 @@ fun OnboardingScreen(modifier: Modifier = Modifier) {
 
 
 @Composable
-private fun MyApp(
-    modifier: Modifier = Modifier,
-    names: List<String> = listOf("World", "Compose")
-) {
-    Column(modifier) {
-        for (name in names) {
-            Greeting(name = name)
-        }
-    }
-}
-
-@Composable
 private fun Greeting(name: String) {
 
     val expanded = remember { mutableStateOf(false) }
-    val extraPadding = if (expanded.value) 48.dp else 0.dp
+    val extraPadding by animateDpAsState(
+        if (expanded.value) 48.dp else 0.dp
+    )
 
 
     Surface(
@@ -106,10 +130,19 @@ private fun Greeting(name: String) {
 
 }
 
+@Preview(showBackground = true, widthDp = 320, heightDp = 320)
+@Composable
+fun OnboardingPreview() {
+    BasicsCodelabTheme {
+        OnboardingScreen(onContinueClicked = {})
+    }
+}
+
+
 @Preview(showBackground = true)
 @Composable
 private fun DefaultPreview() {
     BasicsCodelabTheme {
-        MyApp()
+        MyApp(Modifier.fillMaxSize())
     }
 }
